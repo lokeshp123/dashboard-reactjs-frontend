@@ -1,0 +1,106 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
+import "./responsive.css";
+import Dashboard from "./pages/Dashboard";
+import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
+import { createContext, useEffect, useState } from "react";
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
+import Products from "./pages/Products";
+import ProductDetails from "./pages/ProductDetails";
+import ProductUpload from "./components/ProductUpload";
+
+const MyContext = createContext();
+function App() {
+  const [isToggleSidebar, setISToggleSidebar] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
+  const [isHideSidebarAndHeader, setisHideSidebarAndHeader] = useState(false);
+  const [windowWidth, setwindowWidth] = useState(window.innerWidth);
+  const [themeMode, setThemeMode] = useState(true);
+
+  useEffect(() => {
+    if (themeMode === true) {
+      document.body.classList.add("light");
+      document.body.classList.remove("dark");
+      localStorage.setItem("themeMode", "light");
+    } else {
+      document.body.classList.add("dark");
+      document.body.classList.remove("light");
+      localStorage.setItem("themeMode", "dark");
+    }
+  }, [themeMode]);
+
+  useEffect(() => {
+    const handleReize = () => {
+      setwindowWidth(window.innerWidth);
+    };
+    window.addEventListener("risizer", handleReize);
+
+    return () => {
+      window.removeEventListener("risizer", handleReize);
+    };
+  }, []);
+
+  const values = {
+    isToggleSidebar,
+    setISToggleSidebar,
+    isLogin,
+    setIsLogin,
+    isHideSidebarAndHeader,
+    setisHideSidebarAndHeader,
+    setThemeMode,
+    themeMode,
+    windowWidth,
+  };
+
+  return (
+    <BrowserRouter>
+      <MyContext.Provider value={values}>
+        {
+            isHideSidebarAndHeader !== true && 
+            <Header />
+        }
+         <div className="main d-flex">
+          {isHideSidebarAndHeader !== true && (
+            <div
+              className={`sidebarWrapper ${
+                isToggleSidebar === true ? "toggle" : ""
+              }`}
+            >
+              <Sidebar />
+            </div>
+          )}
+
+          <div
+            className={`content ${isHideSidebarAndHeader === true && "full"} ${
+              isToggleSidebar === true ? "toggle" : ""
+            }`}
+          >
+            <Routes>
+              <Route path="/" exact={true} element={<Dashboard />} />
+              <Route path="/dashboard" exact={true} element={<Dashboard />} />
+              <Route path="/login" exact={true} element={<Login />} />
+              <Route path="/SignUp" exact={true} element={<SignUp />} />
+              <Route path="/products" exact={true} element={<Products />} />
+              <Route
+                path="/product/details"
+                exact={true}
+                element={<ProductDetails />}
+              />
+              <Route
+                path="/product/upload"
+                exact={true}
+                element={<ProductUpload />}
+              />
+            </Routes>
+          </div>
+        </div> 
+      </MyContext.Provider>
+    </BrowserRouter>
+  );
+}
+
+export default App;
+export { MyContext };
